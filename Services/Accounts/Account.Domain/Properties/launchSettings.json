@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Account.Domain": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

@@ -1,0 +1,71 @@
+version: '3.4'
+
+services:
+  accountdb:
+       container_name: accountdb
+       restart: always
+       ports:
+         - "27017:27017"
+       volumes:
+        - "/var/lib/accountdbdata:/data/db"
+       command: ["mongod", "--port", "27017"]
+
+  assessmentdb:
+       container_name: assessmentdb
+       restart: always
+       ports:
+         - "27018:27017"
+       volumes:
+        - "/var/lib/assessmentdbdata:/data/db"
+       command: ["mongod", "--port", "27017"]
+
+  elasticsearch:
+       container_name: elasticsearch
+       environment:
+       - discovery.type=single-node
+       - xpack.security.enabled=false
+       - ES_JAVA_OPTS=-Xms512m -Xmx512m
+       ports:
+       - "9200:9200"
+       - "9300:9300"
+       volumes:
+       - esdata:/usr/share/elasticsearch/data
+
+  # Kibana Service Override
+  kibana:
+      container_name: kibana
+      environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      ports:
+      - "5601:5601"
+      depends_on:
+      - elasticsearch
+    
+  account.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "8080"
+      - "8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  assessment.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "8080"
+      - "8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+
+
+volumes:
+  esdata:
+    driver: local
